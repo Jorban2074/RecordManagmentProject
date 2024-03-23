@@ -2,19 +2,19 @@
 #Areej Amash
 # Check if the record file argument is provided
 if [ $# -eq 0 ]; then
-    echo "Usage: $0 <record_file>"
+    echo "Usage: $0 <RecordFile>"
     exit 1
 fi
 
 record_file="$1"
 # Check if the record file exists
-if [ ! -f "$record_file" ]; then
-    echo "Record file '$record_file' not found."
+if [ ! -f "$RecordFile" ]; then
+    echo "Record file '$RecordFile' not found."
     read -p "Do you want to create a new record file? (y/n): " choice
     case "$choice" in
         [yY])
-            touch "$record_file" || { echo "Failed to create record file"; exit 1; }
-            echo "New record file '$record_file' created."
+            touch "$RecordFile" || { echo "Failed to create record file"; exit 1; }
+            echo "New record file '$RecordFile' created."
             ;;
         *)
             echo "Exiting."
