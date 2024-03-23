@@ -203,11 +203,11 @@ main()
                 Update_Record_Amount "$record_name" "$amount"
                 ;;
             6)
-                echo "The total Amount of Records is:"
+               
                 Print_Total_Amount
                 ;;
             7)
-                echo "The sorted Record is :"
+               
                 Print_Sorted_Record
                 ;;
             8)
