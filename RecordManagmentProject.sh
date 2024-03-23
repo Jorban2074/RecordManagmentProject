@@ -1,20 +1,20 @@
 #!/bin/bash
-#Areej Amash
 # Check if the record file argument is provided
 if [ $# -eq 0 ]; then
-    echo "Usage: $0 <RecordFile>"
+    echo "Usage: $0 <record_file>"
     exit 1
 fi
 
 record_file="$1"
+log_file="script_log.txt"
 # Check if the record file exists
-if [ ! -f "$RecordFile" ]; then
-    echo "Record file '$RecordFile' not found."
+if [ ! -f "$record_file" ]; then
+    echo "Record file '$record_file' not found."
     read -p "Do you want to create a new record file? (y/n): " choice
     case "$choice" in
         [yY])
-            touch "$RecordFile" || { echo "Failed to create record file"; exit 1; }
-            echo "New record file '$RecordFile' created."
+            touch "$record_file" || { echo "Failed to create record file"; exit 1; }
+            echo "New record file '$record_file' created."
             ;;
         *)
             echo "Exiting."
@@ -49,10 +49,10 @@ Update_Record() {
     local amount="$2"
     local operation="$3"
     
-    if grep -q "^$record_name" "$RecordFile"; then
-        existing_amount=$(grep "^$record_name" "$RecordFile" | awk -F ',' '{print $2}')
+    if grep -q "^$record_name" "$record_file"; then
+        existing_amount=$(grep "^$record_name" "$record_file" | awk -F ',' '{print $2}')
         new_amount=$((existing_amount + amount))
-        sed -i "s/^$record_name,.*/$record_name,$new_amount/" "$RecordFile"
+        sed -i "s/^$record_name,.*/$record_name,$new_amount/" "$record_file"
         echo "Record $operation successfully"
         Write_To_LogFile "${operation}Record" "Success" "$record_name $amount"
     else
@@ -65,10 +65,10 @@ Add_Record() {
     local record_name="$1"
     local amount="$2"
     
-    if grep -q "^$record_name" "$RecordFile"; then
+    if grep -q "^$record_name" "$record_file"; then
         Update_Record "$record_name" "$amount" "Add"
     else
-        echo "$record_name,$amount" >> "$RecordFile"
+        echo "$record_name,$amount" >> "$record_file"
         echo "Record added successfully"
         Write_To_LogFile "AddRecord" "Success" "$record_name $amount"
     fi
@@ -79,14 +79,14 @@ Delete_Record() {
     local record_name="$1"
     local amount="$2"
     
-    if grep -q "^$record_name" "$RecordFile"; then
-        existing_amount=$(grep "^$record_name" "$RecordFile" | awk -F ',' '{print $2}')
+    if grep -q "^$record_name" "$record_file"; then
+        existing_amount=$(grep "^$record_name" "$record_file" | awk -F ',' '{print $2}')
         if [ "$amount" -le "$existing_amount" ]; then
             new_amount=$((existing_amount - amount))
             if [ "$new_amount" -eq 0 ]; then
-                sed -i "/^$record_name,/d" "$RecordFile"
+                sed -i "/^$record_name,/d" "$record_file"
             else
-                sed -i "s/^$record_name,.*/$record_name,$new_amount/" "$RecordFile"
+                sed -i "s/^$record_name,.*/$record_name,$new_amount/" "$record_file"
             fi
             echo "Record deleted successfully"
             Write_To_LogFile "DeleteRecord" "Success" "$record_name $amount"
@@ -102,7 +102,7 @@ Delete_Record() {
 Search_Record() {
     local search_string="$1"
     
-    search_result=$(grep -i "$search_string" "$RecordFile")
+    search_result=$(grep -i "$search_string" "$record_file")
     if [ -n "$search_result" ]; then
         sorted_result=$(echo "$search_result" | sort)
         echo "Search results:"
@@ -118,8 +118,8 @@ Update_Record_Name() {
     local old_name="$1"
     local new_name="$2"
     
-    if grep -q "^$old_name" "$RecordFile"; then
-        sed -i "s/^$old_name/$new_name/" "$RecordFile"
+    if grep -q "^$old_name" "$record_file"; then
+        sed -i "s/^$old_name/$new_name/" "$record_file"
         echo "Record name updated successfully"
         Write_To_LogFile "UpdateRecordName" "Success" "$old_name -> $new_name"
     else
@@ -140,7 +140,7 @@ Print_Total_Amount() {
     total=0
     while IFS=',' read -r _ amount; do
         ((total += amount))
-    done < "$RecordFile"
+    done < "$record_file"
     if [ "$total" -gt 0 ]; then
         echo "Total Records: $total"
         Write_To_LogFile "PrintTotalRecords" "Success" "$total"
@@ -151,8 +151,8 @@ Print_Total_Amount() {
 
 # Function to print records in sorted order
 Print_Sorted_Record() {
-    if [ -s "$RecordFile" ]; then
-        sort -t ',' -k1 "$RecordFile" | while IFS=',' read -r name amount; do
+    if [ -s "$record_file" ]; then
+        sort -t ',' -k1 "$record_file" | while IFS=',' read -r name amount; do
             echo "$name $amount"
         done
         Write_To_LogFile "PrintSortedRecords" "Success" 
@@ -162,8 +162,8 @@ Print_Sorted_Record() {
 }
 
 # Main function
-main() {
-    echo "Inside main function"  # Add this line
+main()
+{
     while true; do
         # Display menu
         echo "Menu"
@@ -203,9 +203,11 @@ main() {
                 Update_Record_Amount "$record_name" "$amount"
                 ;;
             6)
+                echo "The total Amount of Records is:"
                 Print_Total_Amount
                 ;;
             7)
+                echo "The sorted Record is :"
                 Print_Sorted_Record
                 ;;
             8)
@@ -218,5 +220,6 @@ main() {
     done
 }
 main
+
 
 
